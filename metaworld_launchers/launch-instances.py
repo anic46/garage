@@ -7,12 +7,12 @@ import click
 def launch_experiments(gpu):
     ####################EDIT THESE FIELDS##################
     username = f'avnishnarayan' # your google username
-    algorithm = f'sac'
+    algorithm = f'ppo'
     zone = f'us-central1-a' # find the apprpropriate zone here https://cloud.google.com/compute/docs/regions-zones
     instance_name = f'{algorithm}-reach-v2' # name that you want to give the instance. Can only be 63 chars long, no special chars except '-'
-    bucket = f'sac/'
+    bucket = f'ppo/'
     branch = 'avnish-new-metaworld-results'
-    experiment = 'metaworld_launchers/single_task_launchers/sac_metaworld.py --env_name reach-v2'
+    experiment = 'metaworld_launchers/single_task_launchers/ppo_metaworld.py --env-name reach-v2'
     ######################################################
 
     if not gpu:
@@ -21,7 +21,7 @@ def launch_experiments(gpu):
         docker_run_file = 'docker_metaworld_run_cpu.py' # 'docker_metaworld_run_gpu.py' for gpu experiment
         docker_build_command = 'make run-headless -C ~/garage/'
         source_machine_image = 'metaworld-v2-cpu-instance'
-        launch_command = (f"gcloud beta compute instances create {instance_name} --async "
+        launch_command = (f"gcloud beta compute instances create {instance_name} "
             f"--metadata-from-file startup-script=launchers/launch-experiment.sh --zone {zone} "
             f"--source-machine-image {source_machine_image} --machine-type {machine_type}")
     else:
@@ -32,7 +32,7 @@ def launch_experiments(gpu):
         source_machine_image = 'metaworld-v2-gpu-instance'
         accelerator = '"type=nvidia-tesla-k80,count=1"'
         launch_command = (f"gcloud beta compute instances create {instance_name} "
-            f"--metadata-from-file startup-script=launchers/launch-experiment.sh --zone {zone} --async "
+            f"--metadata-from-file startup-script=launchers/launch-experiment.sh --zone {zone} "
             f"--source-machine-image {source_machine_image} --machine-type {machine_type} "
             f'--accelerator={accelerator}')
 
@@ -51,7 +51,7 @@ def launch_experiments(gpu):
     with open(f'launchers/launch-experiment.sh', mode='w') as f:
         f.write(script)
 
-    # subprocess.run([launch_command], shell=True)
+    subprocess.Popen([launch_command], shell=True)
     print(launch_command)
 
 launch_experiments()
